@@ -1,0 +1,261 @@
+<!DOCTYPE html><html lang="pt-BR"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRIBUNAL ANTI SCAMES</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; text-align: center; }
+        h1 { color: red; }
+        form, .admin-panel { max-width: 500px; background: #f4f4f4; padding: 20px; border-radius: 8px; margin: auto; text-align: left; }
+        input, textarea, button { width: 100%; margin: 10px 0; padding: 10px; }
+        .container { margin-top: 20px; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); }
+        .popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; text-align: left; width: 90%; max-width: 500px; }
+        .fechar { position: absolute; top: 10px; right: 10px; font-size: 20px; cursor: pointer; }
+        .admin-panel { display: none; }
+    </style>
+</head>
+<body>
+    <h1>TRIBUNAL ANTI SCAMES </h1><div class="container" id="botoes">
+    <button onclick="mostrarFormulario()">📝 Fazer Boletim de Ocorrência</button>
+    <button onclick="verificarConfiabilidade()">🔍 Verificar Confiabilidade</button>
+    <button onclick="verHistorico()">📜 Ver Histórico</button>
+    <button onclick="verPainelAdm()">🔑 Painel de ADM</button>
+</div><div id="overlay" class="overlay">
+    <div class="popup">
+        <span class="fechar" onclick="fecharFormulario()">❌</span>
+        <h2>Formulário de Denúncia</h2>
+        <form id="denunciaForm">
+            <label>Nick do Scammer:</label>
+            <input type="text" id="nick" required><label>Nome no TikTok:</label>
+        <input type="text" id="tiktok" required>
+
+        <label>Chave Pix (se houver):</label>
+        <input type="text" id="pix">
+
+        <label>Relato do Ocorrido:</label>
+        <textarea id="relato" rows="5" required placeholder="Descreva detalhadamente o que aconteceu..."></textarea>
+
+        <label>Provas (prints, vídeos):</label>
+        <input type="file" id="provas" multiple>
+
+        <label>Seu E-mail (para receber atualizações sobre a denúncia):</label>
+        <input type="email" id="email" required>
+
+        <button type="submit">Enviar Denúncia</button>
+    </form>
+</div>
+
+</div><div class="admin-panel" id="painelAdm">
+    <h2>🔑 Painel de Administração</h2>
+    <ul id="listaDenuncias"></ul>
+</div><script>
+    let denuncias = [];
+
+    function mostrarFormulario() {
+        document.getElementById("overlay").style.display = "block";
+    }
+
+    function fecharFormulario() {
+        document.getElementById("overlay").style.display = "none";
+    }
+
+    function verificarConfiabilidade() {
+        let usuario = prompt("Digite o Nick ou Nome no TikTok para verificar a confiabilidade:");
+        if (!usuario) return;
+        alert("🔍 Buscando informações sobre " + usuario);
+    }
+
+    function verHistorico() {
+        let usuario = prompt("Digite o Nick ou Nome no TikTok para ver o histórico:");
+        if (!usuario) return;
+        alert("📜 Exibindo histórico de " + usuario);
+    }
+
+    function verPainelAdm() {
+        let senha = prompt("Digite a senha de administrador:");
+        if (senha === "adm ghost5") {
+            document.getElementById("painelAdm").style.display = "block";
+            atualizarPainelAdm();
+        } else {
+            alert("❌ Senha incorreta!");
+        }
+    }
+
+    document.getElementById("denunciaForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        let novaDenuncia = {
+            nick: document.getElementById("nick").value,
+            tiktok: document.getElementById("tiktok").value,
+            pix: document.getElementById("pix").value,
+            relato: document.getElementById("relato").value,
+            email: document.getElementById("email").value
+        };
+        denuncias.push(novaDenuncia);
+        alert("✅ Denúncia enviada com sucesso!");
+        fecharFormulario();
+        atualizarPainelAdm();
+    });
+
+    function atualizarPainelAdm() {
+        let lista = document.getElementById("listaDenuncias");
+        lista.innerHTML = "";
+        denuncias.forEach((denuncia, index) => {
+            let item = document.createElement("li");
+            item.innerHTML = `
+                <strong>${denuncia.nick} (${denuncia.tiktok})</strong><br>
+                📝 ${denuncia.relato}<br>
+                📧 ${denuncia.email} | 💰 Pix: ${denuncia.pix || "N/A"}<br>
+                <button onclick="removerDenuncia(${index})">❌ Remover</button>
+                <hr>
+            `;
+            lista.appendChild(item);
+        });
+    }
+
+    function removerDenuncia(index) {
+        denuncias.splice(index, 1);
+        atualizarPainelAdm();
+    }
+</script></body>
+</html>
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+    document.getElementById("denunciaForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const { jsPDF } = window.jspdf;
+        let doc = new jsPDF();
+
+        let codigoBoletim = "BO-" + Math.floor(100000 + Math.random() * 900000); // Código aleatório de 6 dígitos
+        let dataHora = new Date().toLocaleString("pt-BR");
+
+        let nick = document.getElementById("nick").value;
+        let tiktok = document.getElementById("tiktok").value;
+        let pix = document.getElementById("pix").value || "N/A";
+        let relato = document.getElementById("relato").value;
+        let email = document.getElementById("email").value;
+
+        // Cabeçalho
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(18);
+        doc.text("TRIBUNAL ANTI SCAMES", 60, 20);
+
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Data: ${dataHora}`, 10, 30);
+        doc.text(`Código do Boletim: ${codigoBoletim}`, 10, 40);
+        doc.line(10, 45, 200, 45);
+
+        // Dados do boletim
+        doc.text(`Nick do Scammer: ${nick}`, 10, 55);
+        doc.text(`Nome no TikTok: ${tiktok}`, 10, 65);
+        doc.text(`Chave Pix: ${pix}`, 10, 75);
+
+        doc.setFont("helvetica", "bold");
+        doc.text("Relato do Ocorrido:", 10, 85);
+        doc.setFont("helvetica", "normal");
+        doc.text(doc.splitTextToSize(relato, 180), 10, 95);
+
+        doc.setFont("helvetica", "bold");
+        doc.text("E-mail para contato:", 10, 140);
+        doc.setFont("helvetica", "normal");
+        doc.text(email, 10, 150);
+
+        doc.save(`Boletim_${codigoBoletim}.pdf`);
+
+        alert(`✅ Boletim registrado com sucesso!\nCódigo: ${codigoBoletim}`);
+        fecharFormulario();
+    });
+</script>
+<style>
+    .mensagem-rolante {
+        position: fixed;
+        bottom: 10px; /* Mantém a mensagem na parte inferior da tela */
+        width: 100%;
+        color: pink; /* Cor do texto */
+        font-size: 20px;
+        font-weight: bold;
+        white-space: nowrap;
+        overflow: hidden;
+        text-align: center;
+        z-index: 9999;
+        background: transparent; /* Remove qualquer fundo */
+    }
+    .texto-animado {
+        display: inline-block;
+        padding-left: 100%;
+        animation: rolarTexto 10s linear infinite;
+    }
+    @keyframes rolarTexto {
+        from {
+            transform: translateX(100%);
+        }
+        to {
+            transform: translateX(-100%);
+        }
+    }
+</style>
+
+<!-- Mensagem rolante na tela -->
+<div class="mensagem-rolante">
+    <span class="texto-animado">zyzii..storee21 | Diva, ADM 💞</span>
+</div>
+<script>
+    function verificarConfiabilidade() {
+        let usuario = prompt("Digite o Nick ou Nome no TikTok para verificar a confiabilidade:");
+        if (!usuario) return;
+
+        if (usuario.toLowerCase() === "zyzii..storee21") {
+            alert("✅ zyzii..storee21 é Confiável 🟢\nBom atendimento, não trata mal as pessoas, só os scammers.");
+        } else {
+            alert("⚠️ Não há informações sobre esse usuário.");
+        }
+    }
+</script>
+<script>
+    function verificarConfiabilidade() {
+        alert("⚠️ O sistema de verificação de confiabilidade está em manutenção. Tente novamente mais tarde.");
+    }
+
+    function verHistorico() {
+        alert("⚠️ O histórico de denúncias está em manutenção. Tente novamente mais tarde.");
+    }
+
+    function verPainelAdm() {
+        alert("❌ Você não tem acesso a esse botão. Apenas o dono pode acessar.");
+    }
+<script>
+// Função para gerar código único de BO
+function gerarCodigoBO() {
+    return "BO" + Math.floor(100000 + Math.random() * 900000);
+}
+
+// Função para salvar BO
+function salvarBO(boData) {
+    let boletins = JSON.parse(localStorage.getItem("boletins")) || [];
+    boletins.push(boData);
+    localStorage.setItem("boletins", JSON.stringify(boletins));
+}
+
+// Exemplo de como usar:
+function registrarBoletim() {
+    const codigo = gerarCodigoBO();
+    const novoBO = {
+        codigo: codigo,
+        nome: document.getElementById("nick").value,
+        tiktok: document.getElementById("tiktok").value,
+        pix: document.getElementById("pix").value,
+        relato: document.getElementById("relato").value,
+        email: document.getElementById("email").value,
+        status: "Recebido",
+        dataHora: new Date().toLocaleString()
+    };
+    salvarBO(novoBO);
+    alert("✅ BO salvo com código: " + codigo);
+}
+</script>
